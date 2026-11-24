@@ -54,3 +54,4 @@
 (package! org-roam)
 (package! org-fragtog)
 (package! valign)
+(package! mixed-pitch)

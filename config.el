@@ -101,7 +101,18 @@
       "v" #'TeX-view)
 
 ;;; Org / org-roam
-(setq org-startup-with-latex-preview t)   ; render all fragments when a note opens
+(setq org-startup-with-latex-preview t   ; render all fragments when a note opens
+      org-hidden-keywords '(title))
+
+(after! org
+  ;; Maths previews
+  (setq org-preview-latex-default-process 'dvisvgm)            ; 1. sharp SVG rendering
+  (add-to-list 'org-latex-packages-alist '("" "newtxmath" t))  ; 2. heavier maths font (previews only)
+  (plist-put org-format-latex-options :scale 1.5)
+  (plist-put org-format-latex-options :background "Transparent")
+  (plist-put org-format-latex-options :foreground "#c8f0c8"))  ; 3. brighter maths
+
+(add-hook 'org-mode-hook #'mixed-pitch-mode)
 
 (setq org-roam-directory (file-truename "~/Dev/sarah"))
 
@@ -109,18 +120,15 @@
   (setq org-roam-db-location
         (expand-file-name "org-roam.db" doom-cache-dir)))
 
-;;; UI
-(setq display-time-format "%H:%M:%S"
-      display-time-interval 1
-      display-time-default-load-average nil)
-(display-time-mode 1)
+(after! org-modern
+  (setq org-modern-table nil))
 
 ;; Tables: align by pixel width
 (add-hook 'org-mode-hook #'valign-mode)
 (setq valign-fancy-bar t
       valign-separator-row-style 'single-column)
 
-;; Find file in project: most recent first
+;;; Find file in project: most recent first
 (after! projectile
   (setq projectile-indexing-method 'hybrid
         projectile-sort-order 'recently-active))
@@ -130,8 +138,10 @@
     (apply fn args)))
 (advice-add #'projectile-find-file :around #'my/no-vertico-sort)
 
-(after! org-modern
-  (setq org-modern-table nil))
+;;; UI
+(setq display-time-format "%H:%M:%S"
+      display-time-interval 1
+      display-time-default-load-average nil)
+(display-time-mode 1)
 
-(after! org
-  (plist-put org-format-latex-options :scale 2))
+(add-hook 'org-mode-hook (lambda () (setq-local line-spacing 0.2)))

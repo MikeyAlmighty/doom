@@ -34,7 +34,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'green-on-black)
+;; (setq doom-theme 'green-on-black)
+(setq doom-theme 'modus-operandi-tritanopia)
 ;; Specify both a dark and light theme, like so and Doom will choose which one
 ;; to load based on your system light/dark setting:
 ;;
@@ -108,9 +109,10 @@
   ;; Maths previews
   (setq org-preview-latex-default-process 'dvisvgm)            ; 1. sharp SVG rendering
   (add-to-list 'org-latex-packages-alist '("" "newtxmath" t))  ; 2. heavier maths font (previews only)
-  (plist-put org-format-latex-options :scale 1.5)
+  (plist-put org-format-latex-options :scale 1.8)
   (plist-put org-format-latex-options :background "Transparent")
-  (plist-put org-format-latex-options :foreground "#c8f0c8"))  ; 3. brighter maths
+    (plist-put org-format-latex-options :foreground 'default))
+  ;; (plist-put org-format-latex-options :foreground "#c8f0c8"))  ; 3. brighter maths
 
 (add-hook 'org-mode-hook #'mixed-pitch-mode)
 
@@ -145,3 +147,26 @@
 (display-time-mode 1)
 
 (add-hook 'org-mode-hook (lambda () (setq-local line-spacing 0.2)))
+(set-fontset-font t 'symbol "Noto Sans Symbols 2" nil 'append)
+
+(after! org
+  (setq org-highlight-latex-and-related nil))
+
+(custom-set-faces!
+  '(org-latex-and-related :background unspecified)
+  '((org-code org-verbatim) :background unspecified))
+
+(defun my/org-latex-preview-toggle-buffer ()
+  "Toggle LaTeX previews for the whole Org buffer.
+If any previews are showing, clear them all; otherwise render them all."
+  (interactive)
+  (if (seq-some (lambda (ov)
+                  (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay))
+                (overlays-in (point-min) (point-max)))
+      (org-clear-latex-preview (point-min) (point-max))
+    (org-latex-preview '(16))))  ; '(16) = C-u C-u: preview the whole buffer
+
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Toggle LaTeX previews (buffer)" "L" #'my/org-latex-preview-toggle-buffer)
